@@ -10,6 +10,7 @@ include { CUTESV                                } from '../../../modules/nf-core
 include { RE2SUPPORT                            } from '../../../modules/local/fix_header_sv/cutesv/main.nf'
 include { BCFTOOLS_SORT as BCFTOOLS_SORT_CUTESV } from '../../../modules/nf-core/bcftools/sort/main.nf'
 include { TABIX_TABIX as TABIX_CUTESV           } from '../../../modules/nf-core/tabix/tabix/main.nf'
+include { DYSGU_RUN                             } from '../../../modules/nf-core/dysgu/run/main'
 workflow CALL_SV {
 
     take:
@@ -42,6 +43,16 @@ workflow CALL_SV {
     GUNZIP_SNIFFLES_PLOT(SNIFFLES.out.vcf)
     SNIFFLES_GENERATE_PLOTS(GUNZIP_SNIFFLES_PLOT.out.gunzip)
     ch_sniffles_plots = SNIFFLES_GENERATE_PLOTS.out.plot_dir
+
+    DYSGU_RUN(
+        input,
+        fasta,
+        [[id: 'fai'], []],
+        [[id: 'sites'], []],
+        [[id: 'bed'], []],
+        [[id: 'search_bed'], []],
+        [[id: 'exclude_bed'], []]
+    )
 
 
     if (merge_sv || run_svim) {
