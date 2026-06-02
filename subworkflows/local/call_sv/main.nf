@@ -10,6 +10,7 @@ include { CUTESV                                } from '../../../modules/nf-core
 include { RE2SUPPORT                            } from '../../../modules/local/fix_header_sv/cutesv/main.nf'
 include { BCFTOOLS_SORT as BCFTOOLS_SORT_CUTESV } from '../../../modules/nf-core/bcftools/sort/main.nf'
 include { TABIX_TABIX as TABIX_CUTESV           } from '../../../modules/nf-core/tabix/tabix/main.nf'
+include { DELLY_CALL                             } from '../../../modules/nf-core/delly/call/main'
 include { DYSGU_RUN                             } from '../../../modules/nf-core/dysgu/run/main'
 workflow CALL_SV {
 
@@ -44,6 +45,10 @@ workflow CALL_SV {
     SNIFFLES_GENERATE_PLOTS(GUNZIP_SNIFFLES_PLOT.out.gunzip)
     ch_sniffles_plots = SNIFFLES_GENERATE_PLOTS.out.plot_dir
 
+    // ========================================
+    // DYSGU
+    // ========================================
+
     DYSGU_RUN(
         input,
         fasta,
@@ -54,6 +59,19 @@ workflow CALL_SV {
         [[id: 'exclude_bed'], []]
     )
 
+    // ========================================
+    // DELLY
+    // ========================================
+
+    input
+        .map { meta, bam, bai -> [meta, bam, bai, [], [], []] }
+        .set { delly_in }
+    DELLY_CALL(
+        delly_in,
+        fasta,
+        [[id: 'fai'], []],
+        'vcf'
+    )
 
     if (merge_sv || run_svim) {
 
