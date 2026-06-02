@@ -3,15 +3,17 @@ Changes in component 'nf-core/delly/call'
 Changes in 'delly/call/main.nf':
 --- modules/nf-core/delly/call/main.nf
 +++ modules/nf-core/delly/call/main.nf
-@@ -35,7 +35,7 @@
+@@ -35,9 +35,8 @@
  
      """
      delly \\
 -        call \\
 +        lr \\
          ${args} \\
-         --threads ${task.cpus} \\
+-        --threads ${task.cpus} \\
          ${bcf_output} \\
+         --genome ${fasta} \\
+         ${genotype} \\
 
 'modules/nf-core/delly/call/meta.yml' is unchanged
 'modules/nf-core/delly/call/tests/main.nf.test' is unchanged

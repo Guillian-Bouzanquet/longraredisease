@@ -37,7 +37,6 @@ process DELLY_CALL {
     delly \\
         lr \\
         ${args} \\
-        --threads ${task.cpus} \\
         ${bcf_output} \\
         --genome ${fasta} \\
         ${genotype} \\
