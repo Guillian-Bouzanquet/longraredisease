@@ -74,6 +74,7 @@ include { ANNOTATE_SV                        } from '../subworkflows/local/annot
 include { FILTER_SV  as FILTER_SV_CUTESV     } from '../subworkflows/local/filter_sv/main.nf'
 include { GUNZIP as GUNZIP_SVIM              } from '../modules/nf-core/gunzip/main.nf'
 include { GUNZIP as GUNZIP_CUTESV            } from '../modules/nf-core/gunzip/main.nf'
+include { GUNZIP as GUNZIP_DYSGU             } from '../modules/nf-core/gunzip/main.nf'
 include { MERGE_SV                           } from '../subworkflows/local/merge_sv/main.nf'
 
 include { UNIFY_VCF                          } from '../subworkflows/local/unify_vcf/main.nf'
@@ -553,6 +554,7 @@ workflow LONGRAREDISEASE {
 
         ch_sv_vcf_final = CALL_SV.out.sniffles_vcf
         ch_svim_vcf = CALL_SV.out.svim_vcf
+        ch_dysgu_vcf = CALL_SV.out.dysgu_vcf
         ch_versions = ch_versions.mix(CALL_SV.out.versions)
 
         if (params.filter_pass_sv) {
@@ -779,6 +781,8 @@ workflow LONGRAREDISEASE {
 
         GUNZIP_CUTESV(ch_cutesv_vcf)
 
+        GUNZIP_DYSGU(ch_dysgu_vcf)
+
         ch_versions = ch_versions.mix(GUNZIP_SVIM.out.versions)
         ch_versions = ch_versions.mix(GUNZIP_CUTESV.out.versions)
 
@@ -793,8 +797,12 @@ workflow LONGRAREDISEASE {
                 GUNZIP_CUTESV.out.gunzip.map { meta, vcf -> [[id: meta.id], vcf] },
                 by: 0
             )
-            .map { sample_key, sniffles_vcf, svim_vcf, cutesv_vcf ->
-                [sample_key, [sniffles_vcf, svim_vcf, cutesv_vcf]]
+            .join(
+                GUNZIP_DYSGU.out.gunzip.map { meta, vcf -> [[id: meta.id], vcf] },
+                by: 0
+            )
+            .map { sample_key, sniffles_vcf, svim_vcf, cutesv_vcf, dysgu_vcf ->
+                [sample_key, [sniffles_vcf, svim_vcf, cutesv_vcf, dysgu_vcf]]
             }
             .join(
                 ch_input_bam.map { meta, bam, bai -> [[id: meta.id], bam, bai] },

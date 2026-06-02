@@ -121,6 +121,7 @@ workflow CALL_SV {
     sniffles_unzipped_vcf = GUNZIP_SNIFFLES_PLOT.out.gunzip
     svim_vcf_tbi     = ch_svim_vcf_tbi       // channel: [ meta, vcf.gz, vcf.gz.tbi ]
     svim_vcf         = ch_svim_vcf           // channel: [ meta, vcf.gz ]
+    dysgu_vcf        = DYSGU_RUN.out.vcf     // channel: [ meta, vcf.gz ]
     cutesv_vcf_tbi   = ch_cutesv_vcf_tbi     // channel: [ meta, vcf.gz, vcf.gz.tbi ]
     cutesv_vcf       = ch_cutesv_vcf         // channel: [ meta, vcf.gz ]
     sniffles_plots   = ch_sniffles_plots     // channel: [ meta, plot_dir ]
