@@ -35,7 +35,7 @@ process DELLY_CALL {
 
     """
     delly \\
-        call \\
+        lr \\
         ${args} \\
         --threads ${task.cpus} \\
         ${bcf_output} \\
