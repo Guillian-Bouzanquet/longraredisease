@@ -11,7 +11,7 @@ include { RE2SUPPORT                            } from '../../../modules/local/f
 include { BCFTOOLS_SORT as BCFTOOLS_SORT_CUTESV } from '../../../modules/nf-core/bcftools/sort/main.nf'
 include { TABIX_TABIX as TABIX_CUTESV           } from '../../../modules/nf-core/tabix/tabix/main.nf'
 include { DELLY_CALL                            } from '../../../modules/nf-core/delly/call/main.nf'
-include { SEVERUS                               } from '../../../modules/nf-core/severus/call/main.nf'
+include { SEVERUS                               } from '../../../modules/nf-core/severus/main.nf'
 include { DYSGU_RUN                             } from '../../../modules/nf-core/dysgu/run/main.nf'
 workflow CALL_SV {
 
@@ -65,12 +65,11 @@ workflow CALL_SV {
     // ========================================
 
     input
-        .map { meta, bam, bai -> [meta, bam, bai, [], []]}
+        .map { meta, bam, bai -> [meta, bam, bai, [], [], []]}
         .set { severus_in }
     SEVERUS(
         severus_in,
         tandem_file,
-        'vcf'
     )
 
     // ========================================
@@ -135,8 +134,8 @@ workflow CALL_SV {
     sniffles_unzipped_vcf = GUNZIP_SNIFFLES_PLOT.out.gunzip
     svim_vcf_tbi     = ch_svim_vcf_tbi       // channel: [ meta, vcf.gz, vcf.gz.tbi ]
     svim_vcf         = ch_svim_vcf           // channel: [ meta, vcf.gz ]
-    severus_vcf        = SEVERUS.out.vcf     // channel: [ meta, vcf.gz ]
     dysgu_vcf        = DYSGU_RUN.out.vcf     // channel: [ meta, vcf.gz ]
+    severus_vcf      = SEVERUS.all.vcf       // channel: [ meta, vcf.gz ]
     cutesv_vcf_tbi   = ch_cutesv_vcf_tbi     // channel: [ meta, vcf.gz, vcf.gz.tbi ]
     cutesv_vcf       = ch_cutesv_vcf         // channel: [ meta, vcf.gz ]
     sniffles_plots   = ch_sniffles_plots     // channel: [ meta, plot_dir ]
