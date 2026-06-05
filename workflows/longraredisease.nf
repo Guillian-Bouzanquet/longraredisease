@@ -75,7 +75,6 @@ include { FILTER_SV  as FILTER_SV_CUTESV     } from '../subworkflows/local/filte
 include { GUNZIP as GUNZIP_SVIM              } from '../modules/nf-core/gunzip/main.nf'
 include { GUNZIP as GUNZIP_CUTESV            } from '../modules/nf-core/gunzip/main.nf'
 include { GUNZIP as GUNZIP_DYSGU             } from '../modules/nf-core/gunzip/main.nf'
-include { GUNZIP as GUNZIP_SEVERUS           } from '../modules/nf-core/gunzip/main.nf'
 include { MERGE_SV                           } from '../subworkflows/local/merge_sv/main.nf'
 
 include { UNIFY_VCF                          } from '../subworkflows/local/unify_vcf/main.nf'
