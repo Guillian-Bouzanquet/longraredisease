@@ -33,6 +33,7 @@ process BCFTOOLS_FIXSORT {
     # MEMO: Have to 'force' annotate, otherwise stop cuz not declared in header:
     #bcftools annotate --force -x \$(cat to_remove.txt | tr '\\n' ',' | sed 's/,\$//') -Ob -o fixed.bcf
 
+    # FIXME: If some 'POS<0', bellow crash and error goes to 'to_fix.txt'
     bcftools view $vcf > /dev/null 2> to_fix.txt
 
     # Build INFO header for missing tags:
@@ -47,10 +48,8 @@ process BCFTOOLS_FIXSORT {
         tr -d "'" |
         awk '{print "##FILTER=<ID="\$3",Description=\\"Added because not defined in header\\">"}' >> to_add.txt
 
-    bcftools view -h $vcf > ori_header.txt
-    (grep -v "^#CHROM" ori_header.txt; cat to_add.txt) > new_header.txt
-    grep "^#CHROM" ori_header.txt >> new_header.txt
-    bcftools reheader -h new_header.txt -o fixed.bcf $vcf
+    # Add lines to header with 'bcftools annotate':
+    bcftools annotate --header-lines to_add.txt -o fixed.bcf $vcf
 
     bcftools \\
         sort \\
