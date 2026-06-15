@@ -2,7 +2,7 @@ include { JASMINESV } from '../../../modules/nf-core/jasminesv/main'
 include { FIX_HEADER_JASMINE } from '../../../modules/local/fix_header_sv/jasmine/main.nf'
 include { BCFTOOLS_VIEW as BCFTOOLS_VIEW_JASMINE } from '../../../modules/nf-core/bcftools/view/main'
 include { BCFTOOLS_REHEADER as BCFTOOLS_REHEADER_JASMINE } from '../../../modules/nf-core/bcftools/reheader/main'
-include { BCFTOOLS_FIXSORT as BCFTOOLS_SORT_JASMINE } from '../../../modules/local/bcftools/fixsort/main'
+include { BCFTOOLS_FIXSORT as BCFTOOLS_SORT_JASMINE } from '../../../modules/local/bcftools/fixsort/main.nf'
 include { TABIX_TABIX as TABIX_JASMINE } from '../../../modules/nf-core/tabix/tabix/main'
 
 workflow MERGE_SV {
