@@ -76,6 +76,9 @@ include { GUNZIP as GUNZIP_SVIM              } from '../modules/nf-core/gunzip/m
 include { GUNZIP as GUNZIP_CUTESV            } from '../modules/nf-core/gunzip/main.nf'
 include { GUNZIP as GUNZIP_DYSGU             } from '../modules/nf-core/gunzip/main.nf'
 include { MERGE_SV                           } from '../subworkflows/local/merge_sv/main.nf'
+include { KANPIG_GT                          } from '../modules/nf-core/kanpig/gt/main.nf'
+include { BCFTOOLS_FIXSORT as BCFTOOLS_SORT_KANPIG } from '../modules/local/bcftools/fixsort/main.nf'
+
 
 include { UNIFY_VCF                          } from '../subworkflows/local/unify_vcf/main.nf'
 include { ANNOTATE_UNIFIED                   } from '../subworkflows/local/annotate_unified/main.nf'
@@ -820,6 +823,20 @@ workflow LONGRAREDISEASE {
             ch_fai,
             []
         )
+        // Genotype with Kanpig
+        MERGE_SV.out.intermediate_vcf
+            .join(
+                ch_input_bam.map { meta, bam, bai -> [[id: meta.id], bam, bai] },
+                by: 0
+            )
+            .map { meta, vcf, bam, bam_index -> [ meta, vcf, [], bam, bam_index, [], [] ]}
+            .set { kanpig_in }
+        KANPIG_GT(
+            kanpig_in,
+            ch_fasta_fai,
+        )
+        BCFTOOLS_SORT_KANPIG(KANPIG_GT.out.vcf)
+
 
         ch_versions = ch_versions.mix(MERGE_SV.out.versions)
 

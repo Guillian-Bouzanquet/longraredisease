@@ -63,6 +63,7 @@ workflow MERGE_SV {
 
     ch_versions = ch_versions.mix(TABIX_JASMINE.out.versions)
     emit:
+    intermediate_vcf      = JASMINESV.out.vcf  // Changed to final output
     vcf      = BCFTOOLS_REHEADER_JASMINE.out.vcf  // Changed to final output
     tbi      = TABIX_JASMINE.out.tbi
     versions = ch_versions
