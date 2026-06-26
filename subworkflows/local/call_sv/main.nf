@@ -5,6 +5,7 @@ include { SNIFFLES_GENERATE_PLOTS                    } from '../../../modules/lo
 // Run svim SV calling
 include { SVIM_ALIGNMENT                      } from '../../../modules/nf-core/svim/alignment/main.nf'
 include { BCFTOOLS_SORT as BCFTOOLS_SORT_SVIM } from '../../../modules/nf-core/bcftools/sort/main.nf'
+include { BCFTOOLS_FILTER as BCFTOOLS_FILTER_SVIM } from '../../../modules/nf-core/bcftools/filter/main.nf'
 // Run cutesv SV calling
 include { CUTESV                                } from '../../../modules/nf-core/cutesv/main.nf'
 include { RE2SUPPORT                            } from '../../../modules/local/fix_header_sv/cutesv/main.nf'
@@ -93,7 +94,9 @@ workflow CALL_SV {
     // ========================================
 
         SVIM_ALIGNMENT(input, fasta)
-        BCFTOOLS_SORT_SVIM(SVIM_ALIGNMENT.out.vcf)
+        // 'SUPPORT>=2' defined in conf
+        BCFTOOLS_FILTER_SVIM (SVIM_ALIGNMENT.out.vcf.map{ meta, vcf -> [ meta, vcf, [] ]})
+        BCFTOOLS_SORT_SVIM(BCFTOOLS_FILTER_SVIM.out.vcf)
 
         ch_svim_vcf = BCFTOOLS_SORT_SVIM.out.vcf
         ch_svim_tbi = BCFTOOLS_SORT_SVIM.out.tbi
