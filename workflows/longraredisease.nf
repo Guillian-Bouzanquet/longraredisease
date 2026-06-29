@@ -76,7 +76,8 @@ include { GUNZIP as GUNZIP_SVIM              } from '../modules/nf-core/gunzip/m
 include { GUNZIP as GUNZIP_CUTESV            } from '../modules/nf-core/gunzip/main.nf'
 include { GUNZIP as GUNZIP_DYSGU             } from '../modules/nf-core/gunzip/main.nf'
 include { MERGE_SV                           } from '../subworkflows/local/merge_sv/main.nf'
-include { KANPIG_GT as GENOTYPE_MERGED_SV    } from '../modules/local/kanpig/gt/main.nf'
+include { GAWK as CLEAN_MERGED_SV            } from '../modules/nf-core/gawk/main.nf'
+include { KANPIG_GT as GENOTYPE_MERGED_SV         } from '../modules/local/kanpig/gt/main.nf'
 include { BCFTOOLS_FIXSORT as BCFTOOLS_SORT_GENOTYPED } from '../modules/local/bcftools/fixsort/main.nf'
 
 
@@ -823,8 +824,13 @@ workflow LONGRAREDISEASE {
             ch_fai,
             []
         )
-        // Genotype merged_sv VCF with Kanpig
-        MERGE_SV.out.intermediate_vcf
+        // Genotype merged_sv VCF (eg: with tool such as Kanpig)
+        CLEAN_MERGED_SV(
+            MERGE_SV.out.intermediate_vcf,
+            file("${projectDir}/bin/clean_merged_sv.awk"),
+            false,
+        )
+        CLEAN_MERGED_SV.out.output
             .join(
                 ch_input_bam.map { meta, bam, bai -> [[id: meta.id], bam, bai] },
                 by: 0
