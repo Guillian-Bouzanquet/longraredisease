@@ -77,7 +77,7 @@ include { GUNZIP as GUNZIP_CUTESV            } from '../modules/nf-core/gunzip/m
 include { GUNZIP as GUNZIP_DYSGU             } from '../modules/nf-core/gunzip/main.nf'
 include { MERGE_SV                           } from '../subworkflows/local/merge_sv/main.nf'
 include { GAWK as CLEAN_MERGED_SV            } from '../modules/nf-core/gawk/main.nf'
-include { KANPIG_GT as GENOTYPE_MERGED_SV         } from '../modules/local/kanpig/gt/main.nf'
+include { GAWK as GENOTYPE_MERGED_SV         } from '../modules/nf-core/gawk/main.nf'
 include { BCFTOOLS_FIXSORT as BCFTOOLS_SORT_GENOTYPED } from '../modules/local/bcftools/fixsort/main.nf'
 
 
@@ -838,10 +838,11 @@ workflow LONGRAREDISEASE {
             .map { meta, vcf, bam, bam_index -> [ meta, vcf, [], bam, bam_index, [], [] ]}
             .set { genotype_in }
         GENOTYPE_MERGED_SV(
-            genotype_in,
-            ch_fasta_fai,
+            CLEAN_MERGED_SV.out.output,
+            file("${projectDir}/bin/genotyper.awk"),
+            false,
         )
-        BCFTOOLS_SORT_GENOTYPED(GENOTYPE_MERGED_SV.out.vcf)
+        BCFTOOLS_SORT_GENOTYPED(GENOTYPE_MERGED_SV.out.output)
 
 
         ch_versions = ch_versions.mix(MERGE_SV.out.versions)
