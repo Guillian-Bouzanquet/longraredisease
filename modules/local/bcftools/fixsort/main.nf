@@ -37,16 +37,20 @@ process BCFTOOLS_FIXSORT {
     bcftools view $vcf > /dev/null 2> to_fix.txt
 
     # Build INFO header for missing tags:
-    grep "W::vcf_parse_info" to_fix.txt |
-        grep "is not defined in the header" |
-        sed 's/assuming //' |
-        tr -d "'" |
-        awk '{print "##INFO=<ID="\$3",Number=1,"\$NF",Description=\\"Added because not defined in header\\">"}' > to_add.txt
+    if grep -q  "W::vcf_parse_info" to_fix.txt; then
+        grep "W::vcf_parse_info" to_fix.txt |
+            grep "is not defined in the header" |
+            sed 's/assuming //' |
+            tr -d "'" |
+            awk '{print "##INFO=<ID="\$3",Number=1,"\$NF",Description=\\"Added because not defined in header\\">"}' > to_add.txt
+    fi
     # Build FILTER header for missing tags:
-    grep "W::vcf_parse_filter" to_fix.txt |
-        grep "is not defined in the header" |
-        tr -d "'" |
-        awk '{print "##FILTER=<ID="\$3",Description=\\"Added because not defined in header\\">"}' >> to_add.txt
+    if grep -q "W::vcf_parse_filter" to_fix.txt; then
+        grep "W::vcf_parse_filter" to_fix.txt |
+            grep "is not defined in the header" |
+            tr -d "'" |
+            awk '{print "##FILTER=<ID="\$3",Description=\\"Added because not defined in header\\">"}' >> to_add.txt
+    fi
 
     # Add lines to header with 'bcftools annotate':
     bcftools annotate --header-lines to_add.txt -o fixed.bcf $vcf
