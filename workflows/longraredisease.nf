@@ -76,7 +76,7 @@ include { GUNZIP as GUNZIP_SVIM              } from '../modules/nf-core/gunzip/m
 include { GUNZIP as GUNZIP_CUTESV            } from '../modules/nf-core/gunzip/main.nf'
 include { GUNZIP as GUNZIP_DYSGU             } from '../modules/nf-core/gunzip/main.nf'
 include { MERGE_SV                           } from '../subworkflows/local/merge_sv/main.nf'
-include { KANPIG_GT as GENOTYPE_MERGED_SV    } from '../modules/nf-core/kanpig/gt/main.nf'
+include { KANPIG_GT as GENOTYPE_MERGED_SV    } from '../modules/local/kanpig/gt/main.nf'
 include { BCFTOOLS_FIXSORT as BCFTOOLS_SORT_GENOTYPED } from '../modules/local/bcftools/fixsort/main.nf'
 
 
