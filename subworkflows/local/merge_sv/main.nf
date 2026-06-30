@@ -1,4 +1,5 @@
 include { JASMINESV } from '../../../modules/nf-core/jasminesv/main'
+include { GAWK as CLEAN_MERGED_SV  } from '../../../modules/nf-core/gawk/main.nf'
 include { FIX_HEADER_JASMINE } from '../../../modules/local/fix_header_sv/jasmine/main.nf'
 include { BCFTOOLS_VIEW as BCFTOOLS_VIEW_JASMINE } from '../../../modules/nf-core/bcftools/view/main'
 include { BCFTOOLS_REHEADER as BCFTOOLS_REHEADER_JASMINE } from '../../../modules/nf-core/bcftools/reheader/main'
@@ -23,6 +24,14 @@ workflow MERGE_SV {
         ch_chr_norm ?: Channel.value([])
     )
     ch_versions = ch_versions.mix(JASMINESV.out.versions)
+
+    // Step 2-alt: Clean JasmineSV VCF (keep only essential INFO keys)
+    // IDEA: Replace bellow FIX_HEADER_JASMINE by this CLEAN_MERGED_SV step ?
+    CLEAN_MERGED_SV(
+        JASMINESV.out.vcf,
+        file("${projectDir}/bin/clean_merged_sv.awk"),
+        false,
+    )
 
     // Step 2: Normalize the merged VCF and create sample file
     FIX_HEADER_JASMINE(JASMINESV.out.vcf)
@@ -63,7 +72,7 @@ workflow MERGE_SV {
 
     ch_versions = ch_versions.mix(TABIX_JASMINE.out.versions)
     emit:
-    intermediate_vcf      = JASMINESV.out.vcf  // Changed to final output
+    intermediate_vcf      = CLEAN_MERGED_SV.out.output  // For merged_SV genotyping (alt method)
     vcf      = BCFTOOLS_REHEADER_JASMINE.out.vcf  // Changed to final output
     tbi      = TABIX_JASMINE.out.tbi
     versions = ch_versions
