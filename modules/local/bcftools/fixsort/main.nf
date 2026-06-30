@@ -36,34 +36,44 @@ process BCFTOOLS_FIXSORT {
     # FIXME: If some 'POS<0', bellow crash and error goes to 'to_fix.txt'
     bcftools view $vcf > /dev/null 2> to_fix.txt
 
-    # Build INFO header for missing tags:
-    if grep -q  "W::vcf_parse_info" to_fix.txt; then
-        grep "W::vcf_parse_info" to_fix.txt |
-            grep "is not defined in the header" |
-            sed 's/assuming //' |
-            tr -d "'" |
-            awk '{print "##INFO=<ID="\$3",Number=1,"\$NF",Description=\\"Added because not defined in header\\">"}' > to_add.txt
+    if [ -s to_fix.txt ]; then
+        # Build INFO header for missing tags:
+        if grep -q  "W::vcf_parse_info" to_fix.txt; then
+            grep "W::vcf_parse_info" to_fix.txt |
+                grep "is not defined in the header" |
+                sed 's/assuming //' |
+                tr -d "'" |
+                awk '{print "##INFO=<ID="\$3",Number=1,"\$NF",Description=\\"Added because not defined in header\\">"}' > to_add.txt
+        fi
+        # Build FILTER header for missing tags:
+        if grep -q "W::vcf_parse_filter" to_fix.txt; then
+            grep "W::vcf_parse_filter" to_fix.txt |
+                grep "is not defined in the header" |
+                tr -d "'" |
+                awk '{print "##FILTER=<ID="\$3",Description=\\"Added because not defined in header\\">"}' >> to_add.txt
+        fi
+
+        # Add lines to header with 'bcftools annotate':
+        bcftools annotate --header-lines to_add.txt -o fixed.bcf $vcf
+
+        bcftools \\
+            sort \\
+            --output ${prefix}.${extension} \\
+            --temp-dir . \\
+            $args \\
+            fixed.bcf
+
+        # Have to delete intermediate 'fixed.bcf' (otherwise present in output):
+        rm fixed.bcf
+
+    else  # If nothing to fix -> simple 'bcftools sort'
+        bcftools \\
+            sort \\
+            --output ${prefix}.${extension} \\
+            --temp-dir . \\
+            $args \\
+            $vcf
     fi
-    # Build FILTER header for missing tags:
-    if grep -q "W::vcf_parse_filter" to_fix.txt; then
-        grep "W::vcf_parse_filter" to_fix.txt |
-            grep "is not defined in the header" |
-            tr -d "'" |
-            awk '{print "##FILTER=<ID="\$3",Description=\\"Added because not defined in header\\">"}' >> to_add.txt
-    fi
-
-    # Add lines to header with 'bcftools annotate':
-    bcftools annotate --header-lines to_add.txt -o fixed.bcf $vcf
-
-    bcftools \\
-        sort \\
-        --output ${prefix}.${extension} \\
-        --temp-dir . \\
-        $args \\
-        fixed.bcf
-
-    # Have to delete intermediate 'fixed.bcf' (otherwise present in output):
-    rm fixed.bcf
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
