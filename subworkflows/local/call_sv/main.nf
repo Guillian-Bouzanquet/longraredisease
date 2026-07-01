@@ -13,6 +13,7 @@ include { BCFTOOLS_SORT as BCFTOOLS_SORT_CUTESV } from '../../../modules/nf-core
 include { TABIX_TABIX as TABIX_CUTESV           } from '../../../modules/nf-core/tabix/tabix/main.nf'
 include { DELLY_CALL                            } from '../../../modules/nf-core/delly/call/main.nf'
 include { SEVERUS                               } from '../../../modules/nf-core/severus/main.nf'
+include { TABIX_BGZIPTABIX as TABIX_SEVERUS     } from '../../../modules/nf-core/tabix/bgziptabix/main.nf'
 include { DYSGU_RUN                             } from '../../../modules/nf-core/dysgu/run/main.nf'
 workflow CALL_SV {
 
@@ -72,6 +73,7 @@ workflow CALL_SV {
         severus_in,
         tandem_file,
     )
+    TABIX_SEVERUS(SEVERUS.out.all_vcf)
 
     // ========================================
     // DELLY
@@ -138,7 +140,7 @@ workflow CALL_SV {
     svim_vcf_tbi     = ch_svim_vcf_tbi       // channel: [ meta, vcf.gz, vcf.gz.tbi ]
     svim_vcf         = ch_svim_vcf           // channel: [ meta, vcf.gz ]
     dysgu_vcf        = DYSGU_RUN.out.vcf     // channel: [ meta, vcf.gz ]
-    severus_vcf      = SEVERUS.out.all_vcf   // channel: [ meta, vcf.gz ]
+    severus_vcf      = TABIX_SEVERUS.out.gz_tbi.map { meta, gz, tbi -> [meta, gz] }   // channel: [ meta, vcf.gz ]
     cutesv_vcf_tbi   = ch_cutesv_vcf_tbi     // channel: [ meta, vcf.gz, vcf.gz.tbi ]
     cutesv_vcf       = ch_cutesv_vcf         // channel: [ meta, vcf.gz ]
     sniffles_plots   = ch_sniffles_plots     // channel: [ meta, plot_dir ]
