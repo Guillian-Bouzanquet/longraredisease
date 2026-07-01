@@ -75,6 +75,8 @@ include { FILTER_SV  as FILTER_SV_CUTESV     } from '../subworkflows/local/filte
 include { GUNZIP as GUNZIP_SVIM              } from '../modules/nf-core/gunzip/main.nf'
 include { GUNZIP as GUNZIP_CUTESV            } from '../modules/nf-core/gunzip/main.nf'
 include { GUNZIP as GUNZIP_DYSGU             } from '../modules/nf-core/gunzip/main.nf'
+include { GUNZIP as GUNZIP_DELLY             } from '../modules/nf-core/gunzip/main.nf'
+include { GUNZIP as GUNZIP_SEVERUS           } from '../modules/nf-core/gunzip/main.nf'
 include { MERGE_SV                           } from '../subworkflows/local/merge_sv/main.nf'
 include { GAWK as GENOTYPE_MERGED_SV         } from '../modules/nf-core/gawk/main.nf'
 include { BCFTOOLS_FIXSORT as BCFTOOLS_SORT_GENOTYPED } from '../modules/local/bcftools/fixsort/main.nf'
@@ -558,6 +560,8 @@ workflow LONGRAREDISEASE {
         ch_sv_vcf_final = CALL_SV.out.sniffles_vcf
         ch_svim_vcf = CALL_SV.out.svim_vcf
         ch_dysgu_vcf = CALL_SV.out.dysgu_vcf
+        ch_delly_vcf = CALL_SV.out.delly_vcf
+        ch_severus_vcf = CALL_SV.out.severus_vcf
         ch_versions = ch_versions.mix(CALL_SV.out.versions)
 
         if (params.filter_pass_sv) {
@@ -778,13 +782,13 @@ workflow LONGRAREDISEASE {
             ch_cutesv_vcf = FILTER_SV_CUTESV.out.ch_vcf_tbi.map { meta, vcf, tbi -> [meta, vcf] }
 
             }
+
         // Jasmine requires unzipped VCFs
-
         GUNZIP_SVIM(ch_svim_vcf)
-
         GUNZIP_CUTESV(ch_cutesv_vcf)
-
         GUNZIP_DYSGU(ch_dysgu_vcf)
+        GUNZIP_DELLY(ch_delly_vcf)
+        GUNZIP_SEVERUS(ch_severus_vcf)
 
         ch_versions = ch_versions.mix(GUNZIP_SVIM.out.versions)
         ch_versions = ch_versions.mix(GUNZIP_CUTESV.out.versions)
