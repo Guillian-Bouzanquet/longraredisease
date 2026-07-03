@@ -11,10 +11,14 @@ include { CUTESV                                } from '../../../modules/nf-core
 include { RE2SUPPORT                            } from '../../../modules/local/fix_header_sv/cutesv/main.nf'
 include { BCFTOOLS_SORT as BCFTOOLS_SORT_CUTESV } from '../../../modules/nf-core/bcftools/sort/main.nf'
 include { TABIX_TABIX as TABIX_CUTESV           } from '../../../modules/nf-core/tabix/tabix/main.nf'
-include { DELLY_CALL                            } from '../../../modules/nf-core/delly/call/main.nf'
+// Run dysgu SV calling
+include { DYSGU_RUN                             } from '../../../modules/nf-core/dysgu/run/main.nf'
+// Run severus SV calling
 include { SEVERUS                               } from '../../../modules/nf-core/severus/main.nf'
 include { TABIX_BGZIPTABIX as TABIX_SEVERUS     } from '../../../modules/nf-core/tabix/bgziptabix/main.nf'
-include { DYSGU_RUN                             } from '../../../modules/nf-core/dysgu/run/main.nf'
+// Run delly SV calling
+include { DELLY_CALL                            } from '../../../modules/nf-core/delly/call/main.nf'
+
 workflow CALL_SV {
 
     take:
