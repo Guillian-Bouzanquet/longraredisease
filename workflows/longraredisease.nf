@@ -77,6 +77,7 @@ include { GUNZIP as GUNZIP_CUTESV            } from '../modules/nf-core/gunzip/m
 include { GUNZIP as GUNZIP_DYSGU             } from '../modules/nf-core/gunzip/main.nf'
 include { GUNZIP as GUNZIP_DELLY             } from '../modules/nf-core/gunzip/main.nf'
 include { GUNZIP as GUNZIP_SEVERUS           } from '../modules/nf-core/gunzip/main.nf'
+include { GUNZIP as GUNZIP_KLED              } from '../modules/nf-core/gunzip/main.nf'
 include { MERGE_SV                           } from '../subworkflows/local/merge_sv/main.nf'
 include { GAWK as GENOTYPE_MERGED_SV         } from '../modules/nf-core/gawk/main.nf'
 include { BCFTOOLS_FIXSORT as BCFTOOLS_SORT_GENOTYPED } from '../modules/local/bcftools/fixsort/main.nf'
@@ -562,6 +563,7 @@ workflow LONGRAREDISEASE {
         ch_dysgu_vcf = CALL_SV.out.dysgu_vcf
         ch_delly_vcf = CALL_SV.out.delly_vcf
         ch_severus_vcf = CALL_SV.out.severus_vcf
+        ch_kled_vcf = CALL_SV.out.kled_vcf
         ch_versions = ch_versions.mix(CALL_SV.out.versions)
 
         if (params.filter_pass_sv) {
@@ -789,6 +791,7 @@ workflow LONGRAREDISEASE {
         GUNZIP_DYSGU(ch_dysgu_vcf)
         GUNZIP_DELLY(ch_delly_vcf)
         GUNZIP_SEVERUS(ch_severus_vcf)
+        GUNZIP_KLED(ch_kled_vcf)
 
         ch_versions = ch_versions.mix(GUNZIP_SVIM.out.versions)
         ch_versions = ch_versions.mix(GUNZIP_CUTESV.out.versions)
@@ -816,8 +819,12 @@ workflow LONGRAREDISEASE {
                 GUNZIP_DELLY.out.gunzip.map { meta, vcf -> [[id: meta.id], vcf] },
                 by: 0
             )
-            .map { sample_key, sniffles_vcf, svim_vcf, cutesv_vcf, dysgu_vcf, severus_vcf, delly_vcf ->
-                [sample_key, [sniffles_vcf, svim_vcf, cutesv_vcf, dysgu_vcf, severus_vcf, delly_vcf]]
+            .join(
+                GUNZIP_KLED.out.gunzip.map { meta, vcf -> [[id: meta.id], vcf] },
+                by: 0
+            )
+            .map { sample_key, sniffles_vcf, svim_vcf, cutesv_vcf, dysgu_vcf, severus_vcf, delly_vcf, kled_vcf ->
+                [sample_key, [sniffles_vcf, svim_vcf, cutesv_vcf, dysgu_vcf, severus_vcf, delly_vcf, kled_vcf]]
             }
             .join(
                 ch_input_bam.map { meta, bam, bai -> [[id: meta.id], bam, bai] },
