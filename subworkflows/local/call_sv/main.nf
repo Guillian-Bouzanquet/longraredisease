@@ -19,7 +19,7 @@ include { TABIX_BGZIPTABIX as TABIX_SEVERUS     } from '../../../modules/nf-core
 // Run delly SV calling
 include { DELLY_CALL                            } from '../../../modules/nf-core/delly/call/main.nf'
 // Run kled SV calling
-include { KLED                                  } from '../../../modules/local/kled/main.nf'
+include { KLED                                  } from '../../../modules/nf-core/kled/main.nf'
 include { TABIX_BGZIPTABIX as TABIX_KLED        } from '../../../modules/nf-core/tabix/bgziptabix/main.nf'
 
 workflow CALL_SV {
