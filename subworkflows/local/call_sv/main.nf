@@ -18,6 +18,9 @@ include { SEVERUS                               } from '../../../modules/nf-core
 include { TABIX_BGZIPTABIX as TABIX_SEVERUS     } from '../../../modules/nf-core/tabix/bgziptabix/main.nf'
 // Run delly SV calling
 include { DELLY_CALL                            } from '../../../modules/nf-core/delly/call/main.nf'
+// Run kled SV calling
+include { KLED                                  } from '../../../modules/local/kled/main.nf'
+include { TABIX_BGZIPTABIX as TABIX_KLED        } from '../../../modules/nf-core/tabix/bgziptabix/main.nf'
 
 workflow CALL_SV {
 
@@ -93,6 +96,16 @@ workflow CALL_SV {
         'vcf'
     )
 
+    // ========================================
+    // KLED
+    // ========================================
+
+    KLED(
+        input,
+        fasta
+    )
+    TABIX_KLED(KLED.out.vcf)
+
     if (merge_sv || run_svim) {
 
     // ========================================
@@ -144,8 +157,9 @@ workflow CALL_SV {
     svim_vcf_tbi     = ch_svim_vcf_tbi       // channel: [ meta, vcf.gz, vcf.gz.tbi ]
     svim_vcf         = ch_svim_vcf           // channel: [ meta, vcf.gz ]
     dysgu_vcf        = DYSGU_RUN.out.vcf     // channel: [ meta, vcf.gz ]
-    delly_vcf        = DELLY_CALL.out.bcf    // channel: [ meta, vcf.gz ]
     severus_vcf      = TABIX_SEVERUS.out.gz_tbi.map { meta, gz, tbi -> [meta, gz] }   // channel: [ meta, vcf.gz ]
+    delly_vcf        = DELLY_CALL.out.bcf    // channel: [ meta, vcf.gz ]
+    kled_vcf         = TABIX_KLED.out.gz_tbi.map { meta, gz, tbi -> [meta, gz] }   // channel: [ meta, vcf.gz ]
     cutesv_vcf_tbi   = ch_cutesv_vcf_tbi     // channel: [ meta, vcf.gz, vcf.gz.tbi ]
     cutesv_vcf       = ch_cutesv_vcf         // channel: [ meta, vcf.gz ]
     sniffles_plots   = ch_sniffles_plots     // channel: [ meta, plot_dir ]
