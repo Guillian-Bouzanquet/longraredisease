@@ -808,8 +808,12 @@ workflow LONGRAREDISEASE {
                 GUNZIP_DYSGU.out.gunzip.map { meta, vcf -> [[id: meta.id], vcf] },
                 by: 0
             )
-            .map { sample_key, sniffles_vcf, svim_vcf, cutesv_vcf, dysgu_vcf ->
-                [sample_key, [sniffles_vcf, svim_vcf, cutesv_vcf, dysgu_vcf]]
+            .join(
+                GUNZIP_SEVERUS.out.gunzip.map { meta, vcf -> [[id: meta.id], vcf] },
+                by: 0
+            )
+            .map { sample_key, sniffles_vcf, svim_vcf, cutesv_vcf, dysgu_vcf, severus_vcf ->
+                [sample_key, [sniffles_vcf, svim_vcf, cutesv_vcf, dysgu_vcf, severus_vcf]]
             }
             .join(
                 ch_input_bam.map { meta, bam, bai -> [[id: meta.id], bam, bai] },
